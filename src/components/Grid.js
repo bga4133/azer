@@ -2,6 +2,8 @@ import React, { Component } from "react";
 import axios from "axios";
 import styled from "styled-components";
 import InfiniteScroll from "react-infinite-scroll-component";
+import Loading from "./Loading";
+import { object } from "prop-types";
 
 const GridComponent = styled.div`
   width: 100%;
@@ -28,6 +30,29 @@ const FlexItems = styled.div`
   justify-content: center;
   align-items: center;
   flex-direction: column;
+`;
+
+const ImgComponent = styled.img`
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 4px 4px rgba(146, 133, 133, 0.1);
+  @media (max-width: 1200px) {
+    .responsive {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+    }
+  }
+`;
+
+const ButtonDelete = styled.button`
+  width: 40px;
+  margin-top: 10px;
+  height: 40px;
+  background-color: #ffc107;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1), 0 4px 4px rgba(146, 133, 133, 0.1);
 `;
 
 export default class Grid extends Component {
@@ -57,7 +82,13 @@ export default class Grid extends Component {
       this.setState({
         response: this.state.response.concat(Array.from({ length: 20 }))
       });
-    }, 500);
+    }, 3000);
+  };
+
+  deleteEvnt = (index, e) => {
+    const response = Object.assign([], this.state.response);
+    response.splice(index, 1);
+    this.setState({ response: response });
   };
 
   render() {
@@ -68,7 +99,12 @@ export default class Grid extends Component {
           dataLength={this.state.response.length}
           next={this.fetchMoreData}
           hasMore={this.state.hasMore}
-          loader={<h4>Loading...</h4>}
+          loader={
+            <Loading>
+              {" "}
+              <h4>Loading ...</h4>{" "}
+            </Loading>
+          }
           endMessage={
             <p style={{ textAlign: "center" }}>
               <b>Yay! You have seen it all</b>
@@ -77,15 +113,23 @@ export default class Grid extends Component {
         >
           <GridComponent>
             {response.length > 0 ? (
-              response.map(data => (
+              response.map((data, index) => (
                 <FlexItems key={data.id}>
                   <div>{data.id}</div>
-                  <img src={data.thumbnailUrl} alt={data.title} />
+                  <ImgComponent
+                    src={data.thumbnailUrl}
+                    alt={data.title}
+                    className="responsive"
+                  />
+                  <ButtonDelete onClick={this.deleteEvnt.bind(this, index)}>
+                    X
+                  </ButtonDelete>
                 </FlexItems>
               ))
             ) : (
               <div>
                 <h2>Empty</h2>
+                <Loading title="Loading" />
               </div>
             )}
           </GridComponent>
